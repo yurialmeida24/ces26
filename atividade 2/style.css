@@ -1,0 +1,7 @@
+body {
+    background-image: url('sky.jpg'); /* Substitua 'ceu.jpg' pelo caminho para sua imagem de céu */
+    background-size: cover; /* Ajuste o tamanho da imagem para cobrir todo o corpo */
+    background-repeat: no-repeat; /* Evite repetir a imagem */
+    margin: 0;
+    overflow: hidden;
+}

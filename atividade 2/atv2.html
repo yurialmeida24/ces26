@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avião e Míssil</title>
+    <link rel="stylesheet" type="text/css" href="style.css"> 
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Defina as dimensões do canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const airplaneImage = new Image();
+        airplaneImage.src = 'airplane2.png'; 
+
+        const missileImage = new Image();
+        missileImage.src = 'missile.png'; 
+
+        const explosionImage = new Image();
+        explosionImage.src = 'explosion.png';
+
+        const explosionSound = new Audio('explosion.mp3'); 
+
+        const airplaneWidth = 100; // Largura do avião
+        const airplaneHeight = 100; // Altura do avião
+        const missileWidth = 40; // Largura do míssil
+        const missileHeight = 40; // Altura do míssil
+        const explosionWidth = 100; // Largura da imagem de explosão
+        const explosionHeight = 100; // Altura da imagem de explosão
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let missileX = canvas.width / 2;
+        let missileY = canvas.height / 2;
+        let missileSpeed = 2;
+        let isFiringMissile = false;
+        let isExploding = false;
+        let canFireMissile = true; // Controle para permitir ou não disparar outro míssil
+        let explosionStartTime = 0;
+
+        // Carregar as imagens do avião, do míssil e da explosão
+        Promise.all([loadImage(airplaneImage), loadImage(missileImage), loadImage(explosionImage)]).then(() => {
+            animate();
+        });
+
+        // Carregue o som de explosão
+        explosionSound.load();
+
+        // Função para carregar uma imagem de forma assíncrona
+        function loadImage(image) {
+            return new Promise((resolve) => {
+                image.onload = resolve;
+            });
+        }
+
+        // Atualize a posição do avião com base na posição do cursor do mouse
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Quando o botão direito do mouse é pressionado, ativar o movimento do míssil em direção ao avião
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (canFireMissile) {
+                isFiringMissile = true;
+                canFireMissile = false; // Impede disparo repetido
+            }
+        });
+
+        function checkCollision() {
+            const dx = missileX - mouseX;
+            const dy = missileY - mouseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < missileWidth / 2 + airplaneWidth / 2) {
+                return true; // Colisão detectada
+            }
+
+            return false; // Sem colisão
+        }
+
+        function explode() {
+            isExploding = true;
+            missileX = -1000; // Mova o míssil para fora da tela
+            missileY = -1000;
+            explosionStartTime = Date.now();
+
+            // Reproduza o som de explosão
+            explosionSound.play();
+
+            // Após a explosão, permita disparar outro míssil após um intervalo
+            setTimeout(() => {
+                canFireMissile = true;
+                isFiringMissile = false;
+                missileX = canvas.width / 2;
+                missileY = canvas.height / 2;
+                isExploding = false;
+            }, 2000); // Aguarde 2 segundos antes de permitir o próximo disparo e retorne o míssil ao centro
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Limpe o canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (isExploding) {
+                // Exiba a imagem de explosão por 1 segundo
+                if (Date.now() - explosionStartTime < 1000) {
+                    ctx.drawImage(explosionImage, mouseX - explosionWidth / 2, mouseY - explosionHeight / 2, explosionWidth, explosionHeight);
+                }
+            } else {
+                if (isFiringMissile) {
+                    // Calcule o ângulo entre o míssil e o avião
+                    const dx = mouseX - missileX;
+                    const dy = mouseY - missileY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance > 0) {
+                        const vx = (dx / distance) * missileSpeed;
+                        const vy = (dy / distance) * missileSpeed;
+
+                        // Atualize a posição do míssil para que ele se mova em direção ao avião
+                        missileX += vx;
+                        missileY += vy;
+
+                        // Verifique a colisão e inicie a explosão
+                        if (checkCollision()) {
+                            explode();
+                        }
+                    }
+                }
+
+                // Calcule o ângulo entre o míssil e o avião
+                const dx = mouseX - missileX;
+                const dy = mouseY - missileY;
+                const angle = Math.atan2(dy, dx) - 5 *Math.PI / 4;
+
+                // Desenhe o míssil na posição central com rotação em direção ao avião
+                ctx.save();
+                ctx.translate(missileX, missileY);
+                ctx.rotate(angle);
+                ctx.drawImage(missileImage, -missileWidth / 2, -missileHeight / 2, missileWidth, missileHeight);
+                ctx.restore();
+
+                // Desenhe o avião na posição do cursor do mouse
+                ctx.drawImage(airplaneImage, mouseX - airplaneWidth / 2, mouseY - airplaneHeight / 2, airplaneWidth, airplaneHeight);
+            }
+        }
+
+        // Inicie a animação
+        animate();
+    </script>
+</body>
+</html>
