@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">     <!-- garantir a responsividade -->
+    <title>Árvore DOM</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        .selected {
+            background-color: yellow; /* Cor de fundo para elementos selecionados */
+        }
+    </style>
+</head>
+<body>
+    <div id="editor">
+        <h1>Árvore DOM</h1>
+        <p>Selecione um elemento clicando nele.</p>
+        <ul>
+            <li>Item 1</li>
+            <li>Item 2</li>
+            <li>Item 3</li>
+        </ul>
+        <div>
+            <p>Parágrafo 1</p>
+            <p>Parágrafo 2</p>
+        </div>
+    </div>
+
+    <button id="remove">Remover Elemento Selecionado</button>
+    <button id="changeText">Mudar Texto do Elemento</button>
+    <button id="addChild">Adicionar Filho</button>
+
+    <script>
+        $(document).ready(function() {
+            // Função para remover o elemento selecionado
+            $("#remove").click(function() {
+                $(".selected").remove();
+            });
+
+            // Função para mudar o texto do elemento selecionado
+            $("#changeText").click(function() {
+                var newText = prompt("Digite o novo texto:");
+                $(".selected").text(newText);
+            });
+
+            // Função para adicionar um novo elemento filho ao elemento selecionado
+            $("#addChild").click(function() {
+                var newChild = $("<div></div>");
+                newChild.text("Novo Filho");
+                newChild.click(function(event) {
+                    // Remova a classe 'selected' de todos os elementos
+                    $("#editor .selected").removeClass("selected");
+                    // Adicione a classe 'selected' apenas ao novo filho
+                    newChild.addClass("selected");
+                    // Impedir que o evento de clique se propague para elementos pai
+                    event.stopPropagation();
+                });
+                $(".selected").append(newChild);
+            });
+
+            // Adicione um ouvinte de evento de clique a todos os elementos no editor
+            $("#editor *").click(function(event) {
+                // Remova a classe 'selected' de todos os elementos
+                $("#editor .selected").removeClass("selected");
+                
+                // Adicione a classe 'selected' apenas ao elemento atual, pai ou filho
+                $(this).addClass("selected");
+                
+                // Impedir que o evento de clique se propague para elementos pai
+                event.stopPropagation();
+            });
+
+            // Adicione um ouvinte de evento de clique no documento para deselecionar
+            $(document).click(function() {
+                $("#editor .selected").removeClass("selected");
+            });
+        });
+    </script>
+</body>
+</html>
