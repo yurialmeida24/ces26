@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Meu Projeto</title>
+</head>
+
+<body>
+  <h1>Bem-vindo ao meu projeto!</h1>
+
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="arquivo">
+    <button type="submit">Enviar</button>
+  </form>
+
+  <form action="/formulario" method="get">
+    <input type="text" name="campo">
+    <button type="submit">Enviar</button>
+  </form>
+
+  <p id="paragrafo">Parágrafo a ser substituído.</p>
+  <button id="botao">Carregar Dados</button>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
